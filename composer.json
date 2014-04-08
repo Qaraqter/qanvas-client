@@ -1,0 +1,20 @@
+{
+	"name" : "qaraqter/qanvas-client",
+	"type" : "library",
+	"description" : "PHP wrapper for communicating with Qaraqter's Qanvas server",
+	"keywords" : [
+		"qanvas",
+		"qaraqter",
+		"php"
+	],
+	"authors" : [{
+			"name" : "Bart Huttinga",
+			"email" : "bart@qaraqter.nl"
+		}
+	],
+	"autoload" : {
+		"psr-0" : {
+			"QanvasClient\\" : "lib/"
+		}
+	}
+}
