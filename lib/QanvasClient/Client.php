@@ -29,9 +29,14 @@ class Client
         ));
 
         $output = curl_exec($handle);
+        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         curl_close($handle);
 
-        return $output;
+        if ($status == 200) {
+            return $output;
+        }
+
+        return false;
     }
 
     public function isProcessedHighChart($url)
