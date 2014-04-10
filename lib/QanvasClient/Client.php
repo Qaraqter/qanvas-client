@@ -21,10 +21,11 @@ class Client
     {
         $handle = curl_init($this->url . '/highcharts/enqueue');
 
+        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($handle, CURLOPT_POST, 1);
+        curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, array(
-            'data' => (string) $chart,
+            'data' => $chart->toJson(),
             'format' => $format,
         ));
 
