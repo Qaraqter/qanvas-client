@@ -2,6 +2,7 @@
 namespace QanvasClient;
 
 use PhpHighCharts\HighChart;
+use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
 
 class Client
 {
@@ -12,9 +13,17 @@ class Client
      */
     private $url;
 
-    public function __construct($url)
+    /**
+     * Cache directory.
+     *
+     * @var string
+     */
+    private $cacheDir;
+
+    public function __construct($url, $cacheDir)
     {
         $this->url = $url;
+        $this->cacheDir = $cacheDir;
     }
 
     public function enqueueHighChart(HighChart $chart, $format = 'svg')
@@ -223,5 +232,25 @@ class Client
         curl_close($handle);
 
         return $content;
+    }
+
+    public function getMimeType($url)
+    {
+        if ($this->isProcessedDocument($url)) {
+            // create tmp file
+            $file = tempnam($this->cacheDir, 'qanvas');
+            copy($url, $file);
+
+            // guess mime type
+            $guesser = MimeTypeGuesser::getInstance();
+            $mimeType = $guesser->guess($file);
+
+            // remove tmp file
+            unlink($file);
+
+            return $mimeType;
+        }
+
+        return false;
     }
 }
