@@ -72,6 +72,66 @@ class Client
         }
     }
 
+    public function clearHighChartQueue()
+    {
+        $handle = curl_init($this->url . '/highcharts/clear-queue');
+
+        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_HEADER, true);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_exec($handle);
+
+        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        curl_close($handle);
+
+        if ($status == 200) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function clearOpenDocumentQueue()
+    {
+        $handle = curl_init($this->url . '/open-document/clear-queue');
+
+        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_HEADER, true);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_exec($handle);
+
+        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        curl_close($handle);
+
+        if ($status == 200) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function clearDocumentQueue()
+    {
+        $handle = curl_init($this->url . '/document/clear-queue');
+
+        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_HEADER, true);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_exec($handle);
+
+        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        curl_close($handle);
+
+        if ($status == 200) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function isProcessedOpenDocument($url)
     {
         $handle = curl_init($url);
