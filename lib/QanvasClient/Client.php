@@ -202,7 +202,7 @@ class Client
     public function generateOpenDocument($template, $data)
     {
         $data = array(
-            'template' => new \CURLFile($template),
+            'template' => class_exists('CURLFile') ? new \CURLFile($template) : "@$template",
             'data' => json_encode($data),
         );
 
@@ -227,7 +227,7 @@ class Client
     public function enqueueOpenDocument($template, $data)
     {
         $data = array(
-            'template' => new \CURLFile($template),
+            'template' => class_exists('CURLFile') ? new \CURLFile($template) : "@$template",
             'data' => json_encode($data),
         );
 
@@ -252,7 +252,7 @@ class Client
     public function enqueueDocument($template, $data, $format = 'pdf')
     {
         $data = array(
-            'template' => new \CURLFile($template),
+            'template' => class_exists('CURLFile') ? new \CURLFile($template) : "@$template",
             'data' => json_encode($data),
         );
 
@@ -277,7 +277,7 @@ class Client
     public function generateDocument($template, $data, $format = 'pdf')
     {
         $data = array(
-            'template' => new \CURLFile($template),
+            'template' => class_exists('CURLFile') ? new \CURLFile($template) : "@$template",
             'data' => json_encode($data),
         );
 
