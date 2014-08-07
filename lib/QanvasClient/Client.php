@@ -239,7 +239,9 @@ class Client
     public function enqueueOpenDocument($template, $data)
     {
         $data = array(
-            'template' => class_exists('CURLFile') ? new \CURLFile($template) : "@$template",
+            'template' => class_exists('CURLFile')
+                ? new \CURLFile($template)
+                : "@$template",
             'data' => json_encode($data),
         );
 
@@ -264,7 +266,9 @@ class Client
     public function enqueueDocument($template, $data, $format = 'pdf')
     {
         $data = array(
-            'template' => class_exists('CURLFile') ? new \CURLFile($template) : "@$template",
+            'template' => class_exists('CURLFile')
+                ? new \CURLFile($template)
+                : "@$template",
             'data' => json_encode($data),
         );
 
@@ -283,7 +287,7 @@ class Client
             return $output;
         }
 
-        throw new \RuntimeException('An error occurred during enqueueing a document.');
+        throw new \RuntimeException('An error occurred during enqueueing a Document.');
     }
 
     public function generateDocument($template, $data, $format = 'pdf')
