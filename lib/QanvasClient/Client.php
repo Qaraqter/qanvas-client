@@ -68,7 +68,11 @@ class Client
             case 204:
                 return false;
             default:
-                throw new \RuntimeException('An error occurred during generating a HighChart.');
+                throw new \RuntimeException(sprintf(
+                    'HTTP status code %d was returned from %s while waiting for HighChart to process.',
+                    $status,
+                    $url
+                ));
         }
     }
 
@@ -151,7 +155,11 @@ class Client
             case 204:
                 return false;
             default:
-                throw new \RuntimeException('An error occurred during generating an Open Document.');
+                throw new \RuntimeException(sprintf(
+                    'HTTP status code %d was returned from %s while waiting for OpenDocument to process.',
+                    $status,
+                    $url
+                ));
         }
     }
 
@@ -174,7 +182,11 @@ class Client
             case 204:
                 return false;
             default:
-                throw new \RuntimeException('An error occurred during generating a document.');
+                throw new \RuntimeException(sprintf(
+                    'HTTP status code %d was returned from %s while waiting for Document to process.',
+                    $status,
+                    $url
+                ));
         }
     }
 
