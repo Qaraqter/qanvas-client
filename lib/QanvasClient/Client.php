@@ -17,6 +17,11 @@ class Client
     private $url;
 
     /**
+     * @var string
+     */
+    private $apiKey;
+
+    /**
      * Cache directory.
      *
      * @var string
@@ -30,19 +35,18 @@ class Client
      */
     private $validator;
 
-    public function __construct($url, $cacheDir)
+    public function __construct($url, $apiKey, $cacheDir)
     {
         $this->url = $url;
+        $this->apiKey = $apiKey;
         $this->cacheDir = $cacheDir;
         $this->validator = Validation::createValidator();
     }
 
     public function enqueueHighChart(HighChart $chart, $format = 'svg')
     {
-        $handle = curl_init($this->url . '/highchart/enqueue');
+        $handle = $this->getCurlHandle($this->url . '/highchart/enqueue');
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, array(
             'data' => $chart->toJson(),
@@ -64,10 +68,8 @@ class Client
 
     public function isProcessedHighChart($url)
     {
-        $handle = curl_init($url);
+        $handle = $this->getCurlHandle($url);
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_HEADER, true);
         curl_setopt($handle, CURLOPT_NOBODY, true);
         curl_exec($handle);
@@ -90,12 +92,28 @@ class Client
         }
     }
 
+    public function clearProcessedHighChart($url)
+    {
+        $handle = $this->getCurlHandle($this->url . '/highchart/clear-queue');
+
+        curl_setopt($handle, CURLOPT_HEADER, true);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_exec($handle);
+
+        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        curl_close($handle);
+
+        if ($status == 200) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function clearHighChartQueue()
     {
-        $handle = curl_init($this->url . '/highchart/clear-queue');
+        $handle = $this->getCurlHandle($this->url . '/highchart/clear-queue');
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_HEADER, true);
         curl_setopt($handle, CURLOPT_NOBODY, true);
         curl_exec($handle);
@@ -112,10 +130,26 @@ class Client
 
     public function clearOpenDocumentQueue()
     {
-        $handle = curl_init($this->url . '/open-document/clear-queue');
+        $handle = $this->getCurlHandle($this->url . '/open-document/clear-queue');
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_HEADER, true);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_exec($handle);
+
+        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        curl_close($handle);
+
+        if ($status == 200) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function clearProcessedDocument($url)
+    {
+        $handle = $this->getCurlHandle($this->url . '/document/clear');
+
         curl_setopt($handle, CURLOPT_HEADER, true);
         curl_setopt($handle, CURLOPT_NOBODY, true);
         curl_exec($handle);
@@ -132,10 +166,8 @@ class Client
 
     public function clearDocumentQueue()
     {
-        $handle = curl_init($this->url . '/document/clear-queue');
+        $handle = $this->getCurlHandle($this->url . '/document/clear-queue');
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_HEADER, true);
         curl_setopt($handle, CURLOPT_NOBODY, true);
         curl_exec($handle);
@@ -152,10 +184,8 @@ class Client
 
     public function isProcessedOpenDocument($url)
     {
-        $handle = curl_init($url);
+        $handle = $this->getCurlHandle($url);
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_HEADER, true);
         curl_setopt($handle, CURLOPT_NOBODY, true);
         curl_exec($handle);
@@ -179,10 +209,8 @@ class Client
 
     public function isProcessedDocument($url)
     {
-        $handle = curl_init($url);
+        $handle = $this->getCurlHandle($url);
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_HEADER, true);
         curl_setopt($handle, CURLOPT_NOBODY, true);
         curl_exec($handle);
@@ -232,12 +260,10 @@ class Client
             'data' => json_encode($data),
         );
 
-        $handle = curl_init($this->url . '/open-document/generate');
+        $handle = $this->getCurlHandle($this->url . '/open-document/generate');
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 
         $output = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
@@ -259,12 +285,10 @@ class Client
             'data' => json_encode($data),
         );
 
-        $handle = curl_init($this->url . '/open-document/enqueue');
+        $handle = $this->getCurlHandle($this->url . '/open-document/enqueue');
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 
         $output = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
@@ -288,12 +312,10 @@ class Client
             'data' => json_encode($data),
         );
 
-        $handle = curl_init($this->url . '/document/enqueue.' . $format);
+        $handle = $this->getCurlHandle($this->url . '/document/enqueue.' . $format);
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 
         $output = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
@@ -315,12 +337,10 @@ class Client
             'data' => json_encode($data),
         );
 
-        $handle = curl_init($this->url . '/document/generate.' . $format);
+        $handle = $this->getCurlHandle($this->url . '/document/generate.' . $format);
 
-        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 
         $content = curl_exec($handle);
         curl_close($handle);
@@ -346,5 +366,18 @@ class Client
         }
 
         return false;
+    }
+
+    private function getCurlHandle($url)
+    {
+        $handle = curl_init($url);
+
+        curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_HTTPHEADER, array(
+            'ApiKey: ' . $this->apiKey,
+        ));
+
+        return $handle;
     }
 }
