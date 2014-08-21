@@ -3,6 +3,9 @@ namespace QanvasClient;
 
 use PhpHighCharts\HighChart;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
+use Symfony\Component\Validator\Constraints\Url;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Validator\LegacyValidator;
 
 class Client
 {
@@ -21,9 +24,17 @@ class Client
     private $cacheDir;
 
     public function __construct($url, $cacheDir)
+    /**
+     * Validator.
+     *
+     * @var LegacyValidator
+     */
+    private $validator;
+
     {
         $this->url = $url;
         $this->cacheDir = $cacheDir;
+        $this->validator = Validation::createValidator();
     }
 
     public function enqueueHighChart(HighChart $chart, $format = 'svg')
@@ -42,7 +53,9 @@ class Client
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         curl_close($handle);
 
-        if ($status == 200) {
+        // status is expected to be 200 and output is expected to be a full url
+        $violations = $this->validator->validateValue($output, new Url());
+        if ($status == 200 && $violations->count() == 0) {
             return $output;
         }
 
@@ -68,7 +81,11 @@ class Client
             case 204:
                 return false;
             default:
-                throw new \RuntimeException('An error occurred during generating a HighChart.');
+                throw new \RuntimeException(sprintf(
+                    'HTTP status code %d was returned from %s while waiting for HighChart to process.',
+                    $status,
+                    $url
+                ));
         }
     }
 
@@ -242,11 +259,13 @@ class Client
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         curl_close($handle);
 
-        if ($status == 200) {
+        // status is expected to be 200 and output is expected to be a full url
+        $violations = $this->validator->validateValue($output, new Url());
+        if ($status == 200 && $violations->count() == 0) {
             return $output;
         }
 
-        throw new \RuntimeException('An error occurred during enqueueing an Open Document.');
+        throw new \RuntimeException('OpenDocument could not be enqueued!');
     }
 
     public function enqueueDocument($template, $data, $format = 'pdf')
@@ -267,11 +286,13 @@ class Client
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         curl_close($handle);
 
-        if ($status == 200) {
+        // status is expected to be 200 and output is expected to be a full url
+        $violations = $this->validator->validateValue($output, new Url());
+        if ($status == 200 && $violations->count() == 0) {
             return $output;
         }
 
-        throw new \RuntimeException('An error occurred during enqueueing a document.');
+        throw new \RuntimeException('Document could not be enqueued!');
     }
 
     public function generateDocument($template, $data, $format = 'pdf')
