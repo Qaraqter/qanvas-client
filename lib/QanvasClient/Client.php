@@ -47,7 +47,6 @@ class Client
     {
         $handle = $this->getCurlHandle($this->url . '/highchart/enqueue', false, true);
 
-        curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, array(
             'data' => $chart->toJson(),
             'format' => $format,
@@ -91,7 +90,10 @@ class Client
 
     public function clearProcessedHighChart($url)
     {
-        $handle = $this->getCurlHandle($this->url . '/highchart/clear-queue', true, false);
+        $filename = basename($url);
+        $url = $this->url . '/highchart/delete-processed/' . $filename;
+
+        $handle = $this->getCurlHandle($url, false, true);
 
         curl_exec($handle);
 
@@ -139,7 +141,10 @@ class Client
 
     public function clearProcessedDocument($url)
     {
-        $handle = $this->getCurlHandle($this->url . '/document/clear', true, false);
+        $filename = basename($url);
+        $url = $this->url . '/document/delete-processed/' . $filename;
+
+        $handle = $this->getCurlHandle($url, false, true);
 
         curl_exec($handle);
 
@@ -272,7 +277,6 @@ class Client
 
         $handle = $this->getCurlHandle($this->url . '/open-document/generate');
 
-        curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
         $output = curl_exec($handle);
@@ -297,7 +301,6 @@ class Client
 
         $handle = $this->getCurlHandle($this->url . '/open-document/enqueue', false, true);
 
-        curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
         $output = curl_exec($handle);
@@ -324,7 +327,6 @@ class Client
 
         $handle = $this->getCurlHandle($this->url . '/document/enqueue.' . $format, false, true);
 
-        curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
         $output = curl_exec($handle);
@@ -349,7 +351,6 @@ class Client
 
         $handle = $this->getCurlHandle($this->url . '/document/generate.' . $format);
 
-        curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
         $content = curl_exec($handle);
@@ -383,6 +384,7 @@ class Client
         $handle = curl_init($url);
 
         curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_HTTPHEADER, array(
             'ApiKey: ' . $this->apiKey,
