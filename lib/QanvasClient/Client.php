@@ -45,7 +45,7 @@ class Client
 
     public function enqueueHighChart(HighChart $chart, $format = 'svg')
     {
-        $handle = $this->getCurlHandle($this->url . '/highchart/enqueue');
+        $handle = $this->getCurlHandle($this->url . '/highchart/enqueue', false, true);
 
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, array(
@@ -295,7 +295,7 @@ class Client
             'data' => json_encode($data),
         );
 
-        $handle = $this->getCurlHandle($this->url . '/open-document/enqueue');
+        $handle = $this->getCurlHandle($this->url . '/open-document/enqueue', false, true);
 
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
@@ -322,7 +322,7 @@ class Client
             'data' => json_encode($data),
         );
 
-        $handle = $this->getCurlHandle($this->url . '/document/enqueue.' . $format);
+        $handle = $this->getCurlHandle($this->url . '/document/enqueue.' . $format, false, true);
 
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
