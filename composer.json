@@ -16,5 +16,9 @@
 		"psr-0" : {
 			"QanvasClient\\" : "lib/"
 		}
+	},
+	"require" : {
+		"symfony/routing" : "~2",
+		"symfony/validator" : "~2"
 	}
 }
