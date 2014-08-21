@@ -229,6 +229,33 @@ class Client
         }
     }
 
+    public function downloadDocument($url)
+    {
+        $handle = $this->getCurlHandle($url, false, true);
+
+        $output = curl_exec($handle);
+
+        return $output;
+    }
+
+    public function downloadHighChart($url)
+    {
+        $handle = $this->getCurlHandle($url, false, true);
+
+        $output = curl_exec($handle);
+
+        return $output;
+    }
+
+    public function downloadOpenDocument($url)
+    {
+        $handle = $this->getCurlHandle($url, false, true);
+
+        $output = curl_exec($handle);
+
+        return $output;
+    }
+
     public function waitForProcessedDocument($url)
     {
         while (!$this->isProcessedDocument($url)) {
