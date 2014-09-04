@@ -59,7 +59,7 @@ class Client
         // status is expected to be 200 and output is expected to be a full url
         $violations = $this->validator->validateValue($output, new Url());
         if ($status == 200 && $violations->count() == 0) {
-            return $output;
+            return $output . '?api_key=' . $this->apiKey;
         }
 
         throw new \RuntimeException('HighChart could not be enqueued!');
@@ -310,7 +310,7 @@ class Client
         // status is expected to be 200 and output is expected to be a full url
         $violations = $this->validator->validateValue($output, new Url());
         if ($status == 200 && $violations->count() == 0) {
-            return $output;
+            return $output . '?api_key=' . $this->apiKey;
         }
 
         throw new \RuntimeException('OpenDocument could not be enqueued!');
@@ -336,7 +336,7 @@ class Client
         // status is expected to be 200 and output is expected to be a full url
         $violations = $this->validator->validateValue($output, new Url());
         if ($status == 200 && $violations->count() == 0) {
-            return $output;
+            return $output . '?api_key=' . $this->apiKey;
         }
 
         throw new \RuntimeException('Document could not be enqueued!');
