@@ -236,7 +236,7 @@ class Client
 
     public function downloadDocument($url)
     {
-        $handle = $this->getCurlHandle($url, false, true);
+        $handle = $this->getCurlHandle($url, false, true, false);
 
         $output = curl_exec($handle);
 
@@ -245,7 +245,7 @@ class Client
 
     public function downloadHighChart($url)
     {
-        $handle = $this->getCurlHandle($url, false, true);
+        $handle = $this->getCurlHandle($url, false, true, false);
 
         $output = curl_exec($handle);
 
@@ -254,7 +254,7 @@ class Client
 
     public function downloadOpenDocument($url)
     {
-        $handle = $this->getCurlHandle($url, false, true);
+        $handle = $this->getCurlHandle($url, false, true, false);
 
         $output = curl_exec($handle);
 
@@ -379,12 +379,16 @@ class Client
         return false;
     }
 
-    private function getCurlHandle($url, $includeHeader = true, $includeBody = true)
+    private function getCurlHandle($url, $includeHeader = true, $includeBody = true, $includePost = true)
     {
         $handle = curl_init($url);
 
         curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($handle, CURLOPT_POST, true);
+
+        if ($includePost) {
+            curl_setopt($handle, CURLOPT_POST, true);
+        }
+
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_HTTPHEADER, array(
             'ApiKey: ' . $this->apiKey,
