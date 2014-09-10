@@ -222,17 +222,37 @@ class Client
 
     public function waitForProcessedHighChart($url)
     {
+        $start = time();
         while (!$this->isProcessedHighChart($url)) {
             sleep(1);
+            if (time() >= $start + 60) {
+                continue;
+            }
         }
     }
 
     public function waitForProcessedOpenDocument($url)
     {
+        $start = time();
         while (!$this->isProcessedOpenDocument($url)) {
             sleep(1);
+            if (time() >= $start + 60) {
+                continue;
+            }
         }
     }
+
+    public function waitForProcessedDocument($url)
+    {
+        $start = time();
+        while (!$this->isProcessedDocument($url)) {
+            sleep(1);
+            if (time() >= $start + 60) {
+                continue;
+            }
+        }
+    }
+
 
     public function downloadDocument($url)
     {
@@ -259,13 +279,6 @@ class Client
         $output = curl_exec($handle);
 
         return $output;
-    }
-
-    public function waitForProcessedDocument($url)
-    {
-        while (!$this->isProcessedDocument($url)) {
-            sleep(1);
-        }
     }
 
     public function generateOpenDocument($template, $data)
