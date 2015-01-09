@@ -43,13 +43,14 @@ class Client
         $this->validator = Validation::createValidator();
     }
 
-    public function enqueueHighChart(HighChart $chart, $format = 'svg')
+    public function enqueueHighChart(HighChart $chart, $format = 'svg', $width = 600)
     {
         $handle = $this->getCurlHandle($this->url . '/highchart/enqueue', false, true);
 
         curl_setopt($handle, CURLOPT_POSTFIELDS, array(
             'data' => $chart->toJson(),
             'format' => $format,
+            'width' => $width,
         ));
 
         $output = curl_exec($handle);
