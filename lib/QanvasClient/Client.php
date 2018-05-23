@@ -35,6 +35,11 @@ class Client
      */
     private $validator;
 
+    /**
+     * @var int
+     */
+    private $getSecondsLeftBeforeTimeout = 55;
+
     public function __construct($url, $apiKey, $cacheDir)
     {
         $this->url = $url;
@@ -73,6 +78,7 @@ class Client
         curl_exec($handle);
 
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+
         curl_close($handle);
 
         switch ($status) {
@@ -221,34 +227,34 @@ class Client
         }
     }
 
-    public function waitForProcessedHighChart($url)
+    public function waitForProcessedHighChart($url, $remainingSeconds = 55)
     {
         $start = time();
         while (!$this->isProcessedHighChart($url)) {
             sleep(1);
-            if (time() >= $start + 60) {
+            if (time() >= $start + $remainingSeconds) {
                 continue;
             }
         }
     }
 
-    public function waitForProcessedOpenDocument($url)
+    public function waitForProcessedOpenDocument($url, $remainingSeconds = 55)
     {
         $start = time();
         while (!$this->isProcessedOpenDocument($url)) {
             sleep(1);
-            if (time() >= $start + 60) {
+            if (time() >= $start + $remainingSeconds) {
                 continue;
             }
         }
     }
 
-    public function waitForProcessedDocument($url)
+    public function waitForProcessedDocument($url, $remainingSeconds = 55)
     {
         $start = time();
         while (!$this->isProcessedDocument($url)) {
             sleep(1);
-            if (time() >= $start + 60) {
+            if (time() >= $start + $remainingSeconds) {
                 continue;
             }
         }
@@ -397,6 +403,7 @@ class Client
     {
         $handle = curl_init($url);
 
+        curl_setopt($handle, CURLOPT_TIMEOUT, $this->getSecondsLeftBeforeTimeout());
         curl_setopt($handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
         if ($includePost) {
@@ -417,5 +424,21 @@ class Client
         }
 
         return $handle;
+    }
+
+    /**
+     * @param int $seconds
+     */
+    public function setSecondsLeftBeforeTimeout($seconds)
+    {
+        $this->secondsLeftBeforeTimeout = $seconds;
+    }
+
+    /**
+     * @return int
+     */
+    private function getSecondsLeftBeforeTimeout()
+    {
+        return $this->secondsLeftBeforeTimeout;
     }
 }
