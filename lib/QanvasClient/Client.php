@@ -1,6 +1,8 @@
 <?php
+
 namespace QanvasClient;
 
+use QanvasClient\Exceptions\CurlTimedOutException;
 use PhpHighCharts\HighChart;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
 use Symfony\Component\Validator\Constraints\Url;
@@ -36,9 +38,11 @@ class Client
     private $validator;
 
     /**
+     * Seconds left for request.
+     *
      * @var int
      */
-    private $getSecondsLeftBeforeTimeout = 55;
+    protected $secondsLeftBeforeTimeout = 55;
 
     public function __construct($url, $apiKey, $cacheDir)
     {
@@ -58,9 +62,7 @@ class Client
             'width' => $width,
         ));
 
-        $output = curl_exec($handle);
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         // status is expected to be 200 and output is expected to be a full url
         $violations = $this->validator->validateValue($output, new Url());
@@ -75,11 +77,7 @@ class Client
     {
         $handle = $this->getCurlHandle($url, true, false);
 
-        curl_exec($handle);
-
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         switch ($status) {
             case 200:
@@ -102,10 +100,7 @@ class Client
 
         $handle = $this->getCurlHandle($url, false, true);
 
-        curl_exec($handle);
-
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         if ($status == 200) {
             return true;
@@ -118,10 +113,7 @@ class Client
     {
         $handle = $this->getCurlHandle($this->url . '/highchart/clear-queue', true, false);
 
-        curl_exec($handle);
-
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         if ($status == 200) {
             return true;
@@ -134,10 +126,7 @@ class Client
     {
         $handle = $this->getCurlHandle($this->url . '/open-document/clear-queue', true, false);
 
-        curl_exec($handle);
-
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         if ($status == 200) {
             return true;
@@ -153,10 +142,7 @@ class Client
 
         $handle = $this->getCurlHandle($url, false, true);
 
-        curl_exec($handle);
-
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         if ($status == 200) {
             return true;
@@ -169,10 +155,7 @@ class Client
     {
         $handle = $this->getCurlHandle($this->url . '/document/clear-queue', true, false);
 
-        curl_exec($handle);
-
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         if ($status == 200) {
             return true;
@@ -185,10 +168,7 @@ class Client
     {
         $handle = $this->getCurlHandle($url, true, false);
 
-        curl_exec($handle);
-
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         switch ($status) {
             case 200:
@@ -208,10 +188,7 @@ class Client
     {
         $handle = $this->getCurlHandle($url, true, false);
 
-        curl_exec($handle);
-
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         switch ($status) {
             case 200:
@@ -227,45 +204,44 @@ class Client
         }
     }
 
-    public function waitForProcessedHighChart($url, $remainingSeconds = 55)
+    public function waitForProcessedHighChart($url)
     {
         $start = time();
         while (!$this->isProcessedHighChart($url)) {
             sleep(1);
-            if (time() >= $start + $remainingSeconds) {
+            if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
                 continue;
             }
         }
     }
 
-    public function waitForProcessedOpenDocument($url, $remainingSeconds = 55)
+    public function waitForProcessedOpenDocument($url)
     {
         $start = time();
         while (!$this->isProcessedOpenDocument($url)) {
             sleep(1);
-            if (time() >= $start + $remainingSeconds) {
+            if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
                 continue;
             }
         }
     }
 
-    public function waitForProcessedDocument($url, $remainingSeconds = 55)
+    public function waitForProcessedDocument($url)
     {
         $start = time();
         while (!$this->isProcessedDocument($url)) {
             sleep(1);
-            if (time() >= $start + $remainingSeconds) {
+            if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
                 continue;
             }
         }
     }
-
 
     public function downloadDocument($url)
     {
         $handle = $this->getCurlHandle($url, false, true, false);
 
-        $output = curl_exec($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         return $output;
     }
@@ -274,7 +250,7 @@ class Client
     {
         $handle = $this->getCurlHandle($url, false, true, false);
 
-        $output = curl_exec($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         return $output;
     }
@@ -283,7 +259,7 @@ class Client
     {
         $handle = $this->getCurlHandle($url, false, true, false);
 
-        $output = curl_exec($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         return $output;
     }
@@ -299,9 +275,7 @@ class Client
 
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
-        $output = curl_exec($handle);
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         if ($status == 200) {
             return $output;
@@ -323,9 +297,7 @@ class Client
 
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
-        $output = curl_exec($handle);
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         // status is expected to be 200 and output is expected to be a full url
         $violations = $this->validator->validateValue($output, new Url());
@@ -349,9 +321,7 @@ class Client
 
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
-        $output = curl_exec($handle);
-        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
         // status is expected to be 200 and output is expected to be a full url
         $violations = $this->validator->validateValue($output, new Url());
@@ -373,10 +343,9 @@ class Client
 
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
-        $content = curl_exec($handle);
-        curl_close($handle);
+        list($output, $status) = $this->executeCurl($handle);
 
-        return $content;
+        return $output;
     }
 
     public function getMimeType($url)
@@ -427,7 +396,32 @@ class Client
     }
 
     /**
-     * @param int $seconds
+     * Execute the curl handle and return the output. If there is any timeout we throw an exception.
+     *
+     * @param $handle
+     * @return mixed
+     * @throws CurlTimedOutException
+     */
+    private function executeCurl($handle)
+    {
+        $output = curl_exec($handle);
+
+        if (curl_errno($handle) === CURLE_OPERATION_TIMEDOUT) {
+            throw new CurlTimedOutException;
+        }
+
+        $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+
+        curl_close($handle);
+
+        return [
+            $output,
+            $status
+        ];
+    }
+
+    /**
+     * @param float $seconds
      */
     public function setSecondsLeftBeforeTimeout($seconds)
     {
@@ -435,7 +429,7 @@ class Client
     }
 
     /**
-     * @return int
+     * @return float
      */
     private function getSecondsLeftBeforeTimeout()
     {
