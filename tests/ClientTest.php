@@ -27,4 +27,14 @@ class ClientTest extends TestCase
         $client->isProcessedHighChart('https://postman-echo.com/delay/2');
         $client->isProcessedHighChart('https://postman-echo.com/delay/3');
     }
+
+    public function testThatMultiple204ResponsesWillThrowACurlTimedOutException()
+    {
+        $this->expectException(CurlTimedOutException::class);
+
+        $client = new Client('', '', '');
+        $client->setSecondsLeftBeforeTimeout(2);
+
+        $client->waitForProcessedHighChart('https://postman-echo.com/status/204');
+    }
 }

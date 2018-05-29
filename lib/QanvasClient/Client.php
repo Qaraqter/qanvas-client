@@ -210,7 +210,7 @@ class Client
         while (!$this->isProcessedHighChart($url)) {
             sleep(1);
             if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
-                continue;
+                throw new CurlTimedOutException;
             }
         }
     }
@@ -221,7 +221,7 @@ class Client
         while (!$this->isProcessedOpenDocument($url)) {
             sleep(1);
             if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
-                continue;
+                throw new CurlTimedOutException;
             }
         }
     }
@@ -232,7 +232,7 @@ class Client
         while (!$this->isProcessedDocument($url)) {
             sleep(1);
             if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
-                continue;
+                throw new CurlTimedOutException;
             }
         }
     }
