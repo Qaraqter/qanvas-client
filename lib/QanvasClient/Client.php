@@ -398,6 +398,7 @@ class Client
         $output = curl_exec($handle);
 
         if (curl_errno($handle) === CURLE_OPERATION_TIMEDOUT) {
+            curl_close($handle);
             throw new CurlTimedOutException;
         }
 
