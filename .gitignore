@@ -1,5 +1,9 @@
+/vendor/
+
 # Eclipse project files
 /.buildpath
 /.project
 /.settings
 
+# PHPstorm
+/.idea
