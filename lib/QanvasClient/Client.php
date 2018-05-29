@@ -208,10 +208,7 @@ class Client
     {
         $start = time();
         while (!$this->isProcessedHighChart($url)) {
-            sleep(1);
-            if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
-                throw new CurlTimedOutException;
-            }
+            $this->handleWaitingForDocument($start);
         }
     }
 
@@ -219,10 +216,7 @@ class Client
     {
         $start = time();
         while (!$this->isProcessedOpenDocument($url)) {
-            sleep(1);
-            if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
-                throw new CurlTimedOutException;
-            }
+            $this->handleWaitingForDocument($start);
         }
     }
 
@@ -230,10 +224,7 @@ class Client
     {
         $start = time();
         while (!$this->isProcessedDocument($url)) {
-            sleep(1);
-            if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
-                throw new CurlTimedOutException;
-            }
+            $this->handleWaitingForDocument($start);
         }
     }
 
@@ -431,8 +422,21 @@ class Client
     /**
      * @return float
      */
-    private function getSecondsLeftBeforeTimeout()
+    public function getSecondsLeftBeforeTimeout()
     {
         return $this->secondsLeftBeforeTimeout;
     }
+
+    /**
+     * @param $start
+     * @throws CurlTimedOutException
+     */
+    protected function handleWaitingForDocument($start)
+    {
+        sleep(1);
+        if (time() >= $start + $this->getSecondsLeftBeforeTimeout()) {
+            throw new CurlTimedOutException;
+        }
+    }
+
 }
